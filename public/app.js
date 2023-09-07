@@ -199,13 +199,13 @@ connection.on('member', (msg) => {
 connection.on('chat', (msg) => {
     if (window.settings.showChats === "0") return;
 
-    addChatItem('', msg, msg.comment);
     
     if( msg.comment.toLowerCase() == 'start'){
         ui.action.build("Missile", msg);
         console.log('started');
     }
-
+    
+    addChatItem('', msg, msg.comment);
 })
 
 // New gift received

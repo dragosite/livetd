@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TikTok LIVE Chat Reader (Demo)</title>
+
+    <meta name="description"
+        content="A chat reader for TikTok LIVE utilizing TikTok-Live-Connector and Socket.IO to forward the data to the client. This demo project uses the unofficial TikTok API to retrieve chat comments, gifts and other events from TikTok LIVE.">
+    <meta name="keywords"
+        content="TikTok,Live,Livestream,Chat,Reader,Scraper,Tracker,tiktok.com,broadcast,api,library,node,node.js,javascript">
+
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="index.css">
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js" crossorigin="anonymous"
+        referrerpolicy="no-referrer"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.4.1/socket.io.min.js" crossorigin="anonymous"
+        referrerpolicy="no-referrer"></script>
+
+    <script src="connection.js"></script>
+    <script src="app.js"></script>
+
+    <script>
+        function generateOverlay() {
+            let username = $('#uniqueIdInput').val();
+            let url = `/obs.html?username=${username}&showLikes=1&showChats=1&showGifts=1&showFollows=1&showJoins=1&bgColor=rgb(24,23,28)&fontColor=rgb(227,229,235)&fontSize=1.3em`;
+
+            if (username) {
+                window.open(url, '_blank');
+            } else {
+                alert("Enter username");
+            }
+        }
+    </script>
+</head>
+
+<body>
+    <div class="head">
+        <h1>TikTok LIVE Chat Reader</h1>
+        <span class="subTitle">Source: <a
+                href="https://github.com/zerodytrash/TikTok-Chat-Reader">https://github.com/zerodytrash/TikTok-Chat-Reader</a></span>
+    </div>
+
+    <div>
+        A chat reader for <a href="https://www.tiktok.com/live">TikTok LIVE</a> utilizing <a
+            href="https://github.com/zerodytrash/TikTok-Live-Connector">TikTok-Live-Connector</a> and <a
+            href="https://socket.io/">Socket.IO</a> to forward the data to the client. More Tools available at <a
+            href="https://tikfinity.zerody.one/" target="_blank">TikFinity</a>.
+    </div>
+
+    <div class="inputFields">
+        <p>Enter the <b>@username</b> of a user who is currently live:</p>
+        <input type="text" id="uniqueIdInput">
+        <input type="button" id="connectButton" value="connect">
+        <a href="#" onclick="generateOverlay()">Generate Overlay URL</a>
+    </div>
+
+    <table class="splitstatetable">
+        <tr>
+            <td>
+                <pre id="stateText"></pre>
+            </td>
+            <td>
+                <div id="roomStats"></div>
+            </td>
+        </tr>
+    </table>
+
+    <table class="splitchattable">
+        <tr>
+            <td>
+                <div class="chatcontainer">
+                    <h3 class="containerheader">Chats</h3>
+                </div>
+            </td>
+            <td>
+                <div class="giftcontainer">
+                    <h3 class="containerheader">Gifts</h3>
+                </div>
+            </td>
+        </tr>
+    </table>
+    <div id="pages">
+        <canvas id="pages-canvas" width="500" height="800"></canvas>
+
+        <div id="pages-overlay"></div>
+
+        <div id="pages-start">
+            <div id="pages-start-maps">
+                <a><img src="images/maps/loopy.png" width="80" height="50">Loopy</a>
+                <a><img src="images/maps/backtrack.png" width="80" height="50">Backtrack</a>
+                <a><img src="images/maps/dash.png" width="80" height="50">Dash</a>
+            </div>
+
+            <div id="pages-start-info">
+                <p>A fully featured tower defense game built with &lt;canvas&gt;.</p>
+
+                <h2>Instructions</h2>
+                <p>Build and upgrade turrets (which costs money and increases score) to kill creeps (which generates
+                    money and increases score). Experiment with the turrets; each has a special ability when fully
+                    upgraded.</p>
+
+                <h2>Shortcuts</h2>
+                <dl>
+                    <dt><kbd>1</kbd></dt>
+                    <dd>Build Laser / Upgrade damage</dd>
+
+                    <dt><kbd>2</kbd></dt>
+                    <dd>Build Missile / Upgrade rate</dd>
+
+                    <dt><kbd>3</kbd></dt>
+                    <dd>Build Tazer / Upgrade range</dd>
+
+                    <dt><kbd>4</kbd></dt>
+                    <dd>Build Mortar / Move</dd>
+
+                    <dt><kbd>*</kbd></dt>
+                    <dd>Sell</dd>
+
+                    <dt><kbd>=</kbd></dt>
+                    <dd>Fast forward</dd>
+
+                    <dt><kbd>Esc</kbd></dt>
+                    <dd>Deselect / Cancel / Pause</dd>
+
+                    <dt><kbd>Enter</kbd></dt>
+                    <dd>Send wave</dd>
+                </dl>
+
+                <div id="pages-start-links">
+                    <a data-page="about">About</a>
+                    (<a href="https://github.com/tkazec/canvas-td/" target="_blank">source</a> |
+                    <a href="http://tkaz.ec/" target="_blank">tkaz.ec</a>)
+                </div>
+            </div>
+        </div>
+
+        <div id="pages-scores">
+            <h3>Loopy</h3>
+            <h3>Backtrack</h3>
+            <h3>Dash</h3>
+
+            <ul id="pages-scores-twitter-loopy"></ul>
+            <ul id="pages-scores-twitter-backtrack"></ul>
+            <ul id="pages-scores-twitter-dash"></ul>
+
+            <ul id="pages-scores-local-loopy"></ul>
+            <ul id="pages-scores-local-backtrack"></ul>
+            <ul id="pages-scores-local-dash"></ul>
+
+            <a data-page="" id="pages-scores-back">←</a>
+        </div>
+
+        <div id="pages-about">
+            <p>Canvas TD was originally created for <a href="http://10k.aneventapart.com/" target="_blank">10k Apart</a>
+                2010, a challenge to build a web app in 10 KiB or less. Finished in less than twelve days, it failed to
+                receive any prizes, but was ranked high in community voting and generated a significant amount of
+                Twitter activity. While lacking much in the way of instructions, it was fully featured and quite
+                enjoyable, and can still be played <a href="legacy.html" target="_blank">here</a>.</p>
+
+            <p>After the contest ended, work was started on a rewrite. Completed in June 2011, it featured far better
+                code, many UI improvements, new gameplay elements, and some real instructions. Technologies used include
+                &lt;canvas&gt;, @font-face, the Twitter Search API, Web Storage, and many other HTML5/CSS3/ES5 features.
+            </p>
+
+            <p>The endless, increasingly difficult gameplay (and many other core elements) is inspired by <a
+                    href="http://onslaught.playr.co.uk/" target="_blank">Onslaught TD</a>. The retro look is heavily
+                based on the excellent <a href="http://bittripgame.com/" target="_blank">BIT.TRIP</a> games and <a
+                    href="http://www.candystand.com/play/vector-td" target="_blank">Vector TD</a>. I'd also like to
+                thank Alex K. and David S. for their plentiful ideas, testing, feedback, and motivation.</p>
+
+            <img src="images/logo.png" id="pages-about-logo" width="224" height="224">
+
+            <a data-page="" id="pages-about-back">←</a>
+        </div>
+    </div>
+
+    <div id="control">
+        <div id="control-left" style="display: none;">
+            <div id="control-turrets">
+                <a data-name="Laser"><img src="images/turrets/laser.png" width="25" height="25"><br>Laser - Type 1</a>
+                <a data-name="Missile"><img src="images/turrets/missile.png" width="25" height="25"><br>Missile - Type
+                    2</a>
+                <a data-name="Tazer"><img src="images/turrets/tazer.png" width="25" height="25"><br>Tazer - Type 3</a>
+                <a data-name="Mortar"><img src="images/turrets/mortar.png" width="25" height="25"><br>Mortar - Type
+                    4</a>
+            </div>
+
+            <div id="control-manage">
+                <a id="control-manage-damage"></a>
+                <a id="control-manage-rate"></a>
+                <a id="control-manage-range"></a>
+                <a id="control-manage-move">Move<br>$90</a>
+                <a id="control-manage-sell"></a>
+                <div id="control-manage-stats"></div>
+            </div>
+
+            <div id="control-score">
+                Game over! You scored <span id="control-score-text"></span>.<br><br>
+                <a href="">Play again</a> or <a data-page="scores">view scores</a>
+                (maybe <a id="control-score-tweet" target="_blank">tweet yours</a>?)
+            </div>
+        </div>
+
+        <div id="control-right" style="float: left; font-size: 16px;">
+            <div id="control-right-1">
+                <strong>👑 Top Player 👑</strong><br><br>
+                <img width="100" height="100"
+                    src="https://upload.wikimedia.org/wikipedia/commons/thumb/9/90/Twemoji_1f600.svg/1200px-Twemoji_1f600.svg.png"
+                    id="topimage" /><br><br>
+                <span id="topname">None</span><br>
+                <span id="topkills">0</span> Kills
+                <br><br>
+                <hr><br>
+                Type 'start' to join<br><br>
+                Like to increase damage<br><br>
+                Follow or Share to increase damage by 10<br><br>
+                Gift to increase damage by 10x<br><br>
+                <hr><br>
+                <!-- Cash $<span id="control-cash">35</span><br> -->
+            </div>
+
+            <div id="control-right-2">
+                Lives <span id="control-lives">10</span><br><br>
+                <span style="margin-bottom: 5px; display: inline-block;">Next Wave:</span><br>
+                <div class=" timer-wrapper">
+                    <a id="control-timer"></a>
+                </div>
+                Wave #<span id="control-wave">1</span>
+            </div>
+
+            <div id="control-right-3">
+                <a id="control-fast" style="display: none;"></a><br>
+                <span id="control-fps">60</span>FPS<br>
+                <a id="control-pause">Pause</a><br>
+                <a href="">Reset</a>
+            </div>
+        </div>
+    </div>
+
+    <script src="scripts/utils.js"></script>
+    <script src="scripts/defs.js"></script>
+    <script src="scripts/game.js"></script>
+    <script src="scripts/ui.js"></script>
+    <script>
+        jQuery("#pages-start-maps a").first()[0].click();
+        if (localStorage.getItem('mvp')) {
+            var topUser = JSON.parse(localStorage.getItem('mvp'));
+            jQuery('#topimage').attr('src', topUser.image);
+            jQuery('#topname').html(topUser.user);
+            jQuery('#topkills').html(topUser.kills);
+        }
+    </script>
+</body>
+
+</html>

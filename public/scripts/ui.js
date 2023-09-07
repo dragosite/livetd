@@ -188,6 +188,7 @@ ui.action.build = function (type, msg) {
         ui.action.refresh();
     } else {
         console.log('not placeable');
+		ui.action.build(type, msg);
     }
 };
 

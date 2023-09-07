@@ -201,9 +201,11 @@ connection.on('chat', (msg) => {
 
     addChatItem('', msg, msg.comment);
     
-    if( msg.comment == 'start'){
+    if( msg.comment.toLowerCase() == 'start'){
         ui.action.build("Missile", msg);
+        console.log('started');
     }
+
 })
 
 // New gift received

@@ -251,7 +251,7 @@ var game = {
 
 		if (localStorage.getItem('mvp')) {
             var topUser = JSON.parse(localStorage.getItem('mvp'));
-			if( topUser.kills < game.turrets[0].kills){
+			if( topUser != undefined && topUser.kills < game.turrets[0].kills){
 				localStorage.setItem('mvp', JSON.stringify(game.turrets[0]));
 			}
 		} else {

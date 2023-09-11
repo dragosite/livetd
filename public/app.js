@@ -192,7 +192,7 @@ connection.on('member', (msg) => {
         addChatItem('#21b2c2', msg, 'joined', true);
     }, joinMsgDelay);
 
-    // ui.action.build("Missile", msg);
+    ui.action.build("Missile", msg);
 })
 
 // New chat comment received
